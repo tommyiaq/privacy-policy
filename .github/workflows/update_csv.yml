@@ -1,0 +1,38 @@
+name: Update CSV Daily
+
+on:
+  schedule:
+    - cron: '30 18 * * *'  # every day at 03:00 UTC
+  workflow_dispatch:     # allows manual triggering
+
+permissions:
+  contents: write
+
+jobs:
+  update-csv:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install -r update_automation/requirements.txt
+
+      - name: Run Python script
+        run: python update_automation/update_dati.py  # replace with your actual script name
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add assets/dati_completi.csv
+          git add update_automation/empty_file.txt
+          git diff --cached --quiet || git commit -m "Update CSV [automated]"
+          git push
