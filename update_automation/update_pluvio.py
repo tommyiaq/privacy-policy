@@ -6,7 +6,7 @@ import time
 import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-MAX_WORKERS = 3  # Number of concurrent downloads
+MAX_WORKERS = 50  # Number of concurrent downloads
 
 def from_html_to_dict(html_station_string):
     result = re.findall(r'VALUES\[\d+\] = new Array\("\d+","\d+/\d+/\d+","\d+.\d+","\d*.*\d*"\)', html_station_string)
@@ -57,6 +57,7 @@ def main():
     # Assemble final dataframe
     dati_pandas = pd.DataFrame.from_dict(dati_stazioni, orient="index")
     dati_completi = pd.concat([stazioni, dati_pandas], axis=1)
+    dati_completi.reset_index(inplace=True)  # Bring IDStazione back as a column
     dati_completi = dati_completi.drop(columns=[
         'Fiume', 'Provincia', 'Comune', 'StazioneExtra',
         'Strumento', 'QuotaTerra', 'IDSensoreRete'
