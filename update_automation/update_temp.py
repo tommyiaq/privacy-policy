@@ -6,7 +6,7 @@ import time
 import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-MAX_WORKERS = 3  # Number of concurrent downloads
+MAX_WORKERS = 1  # Number of concurrent downloads
 
 def from_html_to_dict(html_station_string):
     result = re.findall(r'VALUES\[\d+\] = new Array\("\d+","\d+/\d+/\d+","\d+.\d+","\d*.*\d*"\)', html_station_string)
@@ -14,7 +14,7 @@ def from_html_to_dict(html_station_string):
     for entry in result:
         parts = entry.split('"')
         date = parts[3]
-        value = float(parts[7]) if parts[7] else 0.0
+        value = float(parts[5]) if parts[5] else 0.0
         station_day[date] = value
     return station_day
 
@@ -22,7 +22,7 @@ def fetch_single_station(stazione):
     retries = 1
     while True:
         try:
-            url = f"http://www.sir.toscana.it/monitoraggio/dettaglio.php?id={stazione}&title=&type=pluvio_men"
+            url = f"http://www.sir.toscana.it/monitoraggio/dettaglio.php?id={stazione}&title=&type=termo_men"
             req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
 
             with urllib.request.urlopen(req) as fp:
@@ -44,7 +44,7 @@ def fetch_station_data_parallel(station_ids):
 
 def main():
     # Read the cleaned station metadata
-    stazioni = pd.read_csv("assets/stazioni.csv", sep=";")
+    stazioni = pd.read_csv("assets/test_stazioni.csv", sep=";")
     stazioni = stazioni.drop_duplicates(subset="IDStazione")
     stazioni.set_index("IDStazione", inplace=True)
 
@@ -64,8 +64,5 @@ def main():
     dati_completi.fillna(0, inplace=True)
 
     # Save result
-    dati_completi.to_csv("assets/dati_completi.csv", encoding="utf8", index=False)
-    print("✅ File saved to assets/dati_completi.csv")
-
-if __name__ == "__main__":
-    main()
+    dati_completi.to_csv("assets/temp_completi.csv", encoding="utf8", index=False)
+    print("✅ File saved to assets/temp_completi.csv")

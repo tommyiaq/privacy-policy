@@ -25,8 +25,10 @@ jobs:
         run: |
           pip install -r update_automation/requirements.txt
 
-      - name: Run Python script
-        run: python update_automation/update_dati.py  # replace with your actual script name
+      - name: Run Python scripts
+        run: |
+          python update_automation/update_pluvio.py
+          python update_automation/update_temp.py
 
       - name: Commit and push if changed
         run: |
