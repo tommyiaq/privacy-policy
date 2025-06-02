@@ -6,7 +6,7 @@ import time
 import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-MAX_WORKERS = 50  # Number of concurrent downloads
+MAX_WORKERS = 3  # Number of concurrent downloads
 
 def from_html_to_dict(html_station_string):
     result = re.findall(r'VALUES\[\d+\] = new Array\("\d+","\d+/\d+/\d+","\d+.\d+","\d*.*\d*"\)', html_station_string)
@@ -20,7 +20,7 @@ def from_html_to_dict(html_station_string):
 
 def fetch_single_station(stazione):
     retries = 1
-    while True:
+    while True: 
         try:
             url = f"http://www.sir.toscana.it/monitoraggio/dettaglio.php?id={stazione}&title=&type=pluvio_men"
             req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
