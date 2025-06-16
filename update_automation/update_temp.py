@@ -32,7 +32,11 @@ def fetch_single_station(stazione):
                     return stazione, ""  # Return empty HTML to indicate skip
                 html = fp.read().decode("utf8")
             return stazione, html
+        # Skip also if exeption in terms of 500 internal server error occurs, retry for all other exceptions
         except Exception as e:
+            if "500" in str(e):
+                print(f"⚠️  Station {stazione} encountered a 500 error, skipping.")
+                return stazione, ""  # Return empty HTML to indicate skip
             wait = retries * 10
             print(f"❌ Error for {stazione}: {e} — retrying in {wait}s")
             time.sleep(wait)
