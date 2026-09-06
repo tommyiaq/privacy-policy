@@ -60,7 +60,11 @@ def main():
     dati_completi.reset_index(inplace=True)  # Bring IDStazione back as a column
     dati_completi = dati_completi.drop(columns=[
         'Fiume', 'Provincia', 'Comune', 'StazioneExtra',
-        'Strumento', 'QuotaTerra', 'IDSensoreRete'
+        'Strumento', 'QuotaTerra', 'IDSensoreRete',
+        # Added by SIR to the stazioni.csv export in 2026. They are text columns
+        # containing empty values, so leaving them in makes the fillna(0) below
+        # raise TypeError on pandas >= 3.
+        'DataAttivazione', 'DataDismissione', 'ZonaAllerta'
     ], errors='ignore')
     dati_completi.fillna(0, inplace=True)
 
