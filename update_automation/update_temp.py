@@ -8,6 +8,15 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 MAX_WORKERS = 3  # Number of concurrent downloads
 
+# NOTE: unlike update_pluvio.py, nothing is trimmed here. A daily MEAN
+# temperature can only be published once the day has closed, so termo_men's
+# newest column is already a complete day and lags pluvio_men by one. Dropping
+# it would leave temperature a day behind rainfall. Verified 07/09/2026 10:27Z:
+#   pluvio_men -> "07/09/2026"  (in progress)
+#   termo_men  -> "06/09/2026"  (complete)
+# Dropping pluvio's in-progress day therefore lands both files on the same day.
+
+
 def from_html_to_dict(html_station_string):
     result = re.findall(r'VALUES\[\d+\] = new Array\("\d+","\d+/\d+/\d+","\d+.\d+","\d*.*\d*"\)', html_station_string)
     station_day = {}

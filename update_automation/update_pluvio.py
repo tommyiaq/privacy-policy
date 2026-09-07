@@ -5,8 +5,28 @@ import pandas as pd
 import time
 import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime
 
 MAX_WORKERS = 3  # Number of concurrent downloads
+
+DATE_COL = re.compile(r"\d{2}/\d{2}/\d{4}$")
+
+
+def drop_incomplete_day(df):
+    """Remove the newest date column, which is the day still in progress.
+
+    SIR's measurement day rolls over mid-morning, so whenever this runs the
+    most recent column is a day that is still accumulating. Publishing it means
+    the app can sum a partial day as if it were whole -- which matters now that
+    the fruiting window can slide as far as the target day itself.
+    """
+    date_cols = [c for c in df.columns if DATE_COL.match(str(c))]
+    if len(date_cols) < 2:
+        return df
+    newest = max(date_cols, key=lambda c: datetime.strptime(c, "%d/%m/%Y"))
+    print(f"dropping in-progress day: {newest}")
+    return df.drop(columns=[newest])
+
 
 def from_html_to_dict(html_station_string):
     result = re.findall(r'VALUES\[\d+\] = new Array\("\d+","\d+/\d+/\d+","\d+.\d+","\d*.*\d*"\)', html_station_string)
@@ -66,6 +86,7 @@ def main():
         # raise TypeError on pandas >= 3.
         'DataAttivazione', 'DataDismissione', 'ZonaAllerta'
     ], errors='ignore')
+    dati_completi = drop_incomplete_day(dati_completi)
     dati_completi.fillna(0, inplace=True)
 
     # Save result

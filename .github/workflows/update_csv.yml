@@ -2,7 +2,12 @@ name: Update CSV Daily
 
 on:
   schedule:
-    - cron: '30 18 * * *'  # every day at 03:00 UTC
+    # 10:35 UTC. SIR's measurement day rolls over around 09:00-10:00 UTC (they
+    # work in solar time year-round, so this does not drift with DST), which
+    # means running after it is the first moment the previous day is complete.
+    # An odd minute on purpose: GitHub delays cron heavily on round times --
+    # the old '30 18' trigger was consistently firing at 20:38-20:57.
+    - cron: '35 10 * * *'
   workflow_dispatch:     # allows manual triggering
 
 permissions:
@@ -29,6 +34,7 @@ jobs:
         run: |
           python update_automation/update_pluvio.py
           python update_automation/update_temp.py
+          python update_automation/interpolate_temp.py
 
       - name: Commit and push if changed
         run: |
